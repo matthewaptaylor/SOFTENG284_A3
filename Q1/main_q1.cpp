@@ -32,7 +32,7 @@ public:
 	~HashTable() {
 		delete[] this->table;
 	}
-	
+
 	/**
 	 * Adds a key to the hash table.
 	 *
@@ -92,7 +92,7 @@ protected:
 private:
 	/**
 	 * Calculates the next address to probe.
-	 * 
+	 *
 	 * \param i The current address.
 	 * \param key The key to be inserted.
 	 * \return The next address.
@@ -115,7 +115,7 @@ private:
 	 * \return The next address.
 	 */
 	int nextAddress(int i, int) {
-		i --;
+		i--;
 		if (i < 0)
 			i += this->size;
 		return i;
@@ -127,7 +127,19 @@ private:
  * Hash table using double hashing for collision resolution.
  */
 class DoubleHashTable : public HashTable {
-	using HashTable::HashTable; // Inherit HashTable constructor
+private:
+	int p; // Number used for open addressing
+
+public:
+	/**
+	 * The constructor.
+	 *
+	 * \param size Size of the hash table.
+	 * \param p Number used for open addressing.
+	 */
+	DoubleHashTable(int size, int p) : HashTable(size) {
+		this->p = p;
+	}
 
 private:
 	/**
@@ -138,7 +150,7 @@ private:
 	 * \return The next address.
 	 */
 	int nextAddress(int i, int key) {
-		i -= (key % 3) + 1;
+		i -= (key % p) + 1;
 		if (i < 0)
 			i += this->size;
 		return i;
@@ -163,7 +175,7 @@ int main() {
 		lineStream.ignore();
 
 		LinearProbingTable lpTable(size);
-		DoubleHashTable dhTable(size);
+		DoubleHashTable dhTable(size, p);
 
 		// Loop through hash keys
 		for (int i; lineStream >> i;) {

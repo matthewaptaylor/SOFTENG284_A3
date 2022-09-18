@@ -26,5 +26,8 @@
     <Text Include="test_q1_out.txt">
       <Filter>Source Files</Filter>
     </Text>
+    <Text Include="test_hash_in_custom.txt">
+      <Filter>Source Files</Filter>
+    </Text>
   </ItemGroup>
 </Project>

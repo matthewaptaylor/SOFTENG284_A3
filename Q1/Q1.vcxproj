@@ -131,6 +131,7 @@
   </ItemGroup>
   <ItemGroup>
     <Text Include="test_hash_in.txt" />
+    <Text Include="test_hash_in_custom.txt" />
     <Text Include="test_q1_out.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
