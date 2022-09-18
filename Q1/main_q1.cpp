@@ -32,6 +32,33 @@ public:
 	~HashTable() {
 		delete[] this->table;
 	}
+	
+	/**
+	 * Adds a key to the hash table.
+	 *
+	 * \param key The key to add to the hash table.
+	 */
+	void addKey(int key) {
+		this->finalProbes = 0; // Track probes of this addition 
+
+		// Fill first empty address with key
+		int i = hash(key);
+		while (true) {
+			this->finalProbes++;
+
+			// Fill empty address and break
+			if (this->table[i] == 0) {
+				this->table[i] = key;
+				break;
+			}
+
+			// Check next address to the left
+			i = this->nextAddress(i, key);
+		}
+
+		if (i != hash(key))
+			this->collisions++;
+	}
 
 	/**
 	 * Gets collisions.
@@ -55,12 +82,22 @@ protected:
 	/**
 	 * Hashes a key.
 	 *
-	 * \param key Key to hash.
-	 * \return Hashed value.
+	 * \param key The key to hash.
+	 * \return The hashed value.
 	 */
 	int hash(int key) {
 		return key % this->size;
 	}
+
+private:
+	/**
+	 * Calculates the next address to probe.
+	 * 
+	 * \param i The current address.
+	 * \param key The key to be inserted.
+	 * \return The next address.
+	 */
+	virtual int nextAddress(int i, int key) = 0;
 };
 
 
@@ -70,34 +107,18 @@ protected:
 class LinearProbingTable : public HashTable {
 	using HashTable::HashTable; // Inherit HashTable constructor
 
-public:
+private:
 	/**
-	 * Adds a key to the hash table.
+	 * Calculates the next address to probe.
 	 *
-	 * \param key Key to add to the hash table.
+	 * \param i The current address.
+	 * \return The next address.
 	 */
-	void addKey(int key) {
-		this->finalProbes = 0; // Track probes of this addition 
-
-		// Fill first empty address with key
-		int i = hash(key);
-		while (true) {
-			this->finalProbes++;
-
-			// Fill empty address and break
-			if (this->table[i] == 0) {
-				this->table[i] = key;
-				break;
-			}
-
-			// Check address to the left
-			if (i == 0)
-				i = size;
-			i--;
-		}
-
-		if (i != hash(key))
-			collisions++;
+	int nextAddress(int i, int) {
+		i --;
+		if (i < 0)
+			i += this->size;
+		return i;
 	}
 };
 
@@ -105,12 +126,28 @@ public:
 /**
  * Hash table using double hashing for collision resolution.
  */
-class DoubleHashTable {
+class DoubleHashTable : public HashTable {
+	using HashTable::HashTable; // Inherit HashTable constructor
+
+private:
+	/**
+	 * Calculates the next address to probe.
+	 *
+	 * \param i The current address.
+	 * \param key The key to be inserted.
+	 * \return The next address.
+	 */
+	int nextAddress(int i, int key) {
+		i -= (key % 3) + 1;
+		if (i < 0)
+			i += this->size;
+		return i;
+	}
 };
 
 
 int main() {
-	// Loop through each data source
+	// Loop through each set of keys
 	std::string hashLine;
 	while (std::getline(std::cin, hashLine)) {
 		std::stringstream lineStream(hashLine);
@@ -126,17 +163,20 @@ int main() {
 		lineStream.ignore();
 
 		LinearProbingTable lpTable(size);
+		DoubleHashTable dhTable(size);
 
 		// Loop through hash keys
 		for (int i; lineStream >> i;) {
 			lpTable.addKey(i);
+			dhTable.addKey(i);
 
 			// Ignore next comma
 			if (lineStream.peek() == ',')
 				lineStream.ignore();
 		}
 
-		std::cout << lpTable.getCollisions() << ',' << lpTable.getFinalProbes() << std::endl;
+		std::cout << lpTable.getCollisions() << ',' << lpTable.getFinalProbes() << ',';
+		std::cout << dhTable.getCollisions() << ',' << dhTable.getFinalProbes() << std::endl;
 	}
 
 	return 0;
