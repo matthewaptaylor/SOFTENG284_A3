@@ -15,13 +15,12 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="main_q1.cpp">
+    <ClCompile Include="main_q2.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <Text Include="test_q1_out.txt" />
-    <Text Include="test_hash_in.txt" />
-    <Text Include="test_hash_in_custom.txt" />
+    <Text Include="test_digraph_in.txt" />
+    <Text Include="test_q2_out.txt" />
   </ItemGroup>
 </Project>
