@@ -48,7 +48,7 @@ public:
 	int containsCycle() {
 		if (this->order == 0) return 0;
 
-		// Initialise paths with arcs of first node
+		// Find paths starting from root node
 		std::vector<std::vector<int>> paths;
 		for (int nextNode : this->graph[0]) {
 			std::vector<int> path{ 0, nextNode };
@@ -62,11 +62,15 @@ public:
 			// Add each child path to the paths vector
 			int lastNode = path.back();
 			for (int childNode : this->graph[lastNode]) {
-				if (std::find(path.begin(), path.end(), childNode) != path.end()) {
-					// Child node already exists in the path, cycle exists
-					return 1;
+				bool nodeExists = std::find(path.begin(), path.end(), childNode) != path.end();
+				if (path.size() > 2 && nodeExists) {
+					// Child node already exists in the path
+					if (path.size() < 3)
+						continue; // Cycle cannot have length less than 3
+
+					return 1; // Cycle exists
 				}
-				else {
+				else if (!nodeExists) {
 					// Create new path with this child node
 					std::vector<int> newPath(path);
 					newPath.push_back(childNode);
