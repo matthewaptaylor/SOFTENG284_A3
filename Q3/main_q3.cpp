@@ -2,7 +2,6 @@
 #include <string>
 #include <sstream>
 #include <vector>
-#include <algorithm>
 
 
 /**
@@ -11,12 +10,11 @@
 class Digraph {
 private:
 	int order; // Order of the graph
-	std::vector<int>* graph; // Array of vectors, describing the arcs of a each node
+	std::vector<int>* graph; // Array of adjacency list vectors
 
 public:
 	/**
-	 * @bried The constructor.
-	 *
+	 * @brief The constructor.
 	 * @param order Order of the graph.
 	 */
 	Digraph(int order) {
@@ -31,7 +29,6 @@ public:
 		delete[] this->graph;
 	}
 
-
 	/**
 	 * @brief Adds an edge to the graph.
 	 * @param node Node of the edge.
@@ -43,46 +40,49 @@ public:
 
 	/**
 	 * @brief Determines whether the digraph contains a cycle.
-	 * @return 1 if a cycle is found, 0 if not.
+	 * @return Whether the digraph is cyclic.
 	*/
-	int containsCycle() {
-		if (this->order == 0) return 0;
+	bool containsCycle() {
+		bool* visitedNodes = new bool[order] {false};
+		bool* inCurrentPath = new bool[order] {false};
 
-		// Find paths starting from root node
-		std::vector<std::vector<int>> paths;
-		for (int nextNode : this->graph[0]) {
-			std::vector<int> path{ 0, nextNode };
-			paths.push_back(path);
+		// Search first node, then nodes not reachable from the first
+		for (int i = 0; i < order; i++) {
+			if (visitedNodes[i] == false && cycleDfs(i, visitedNodes, inCurrentPath))
+				return true;
 		}
 
-		// Process each path
-		while (paths.size() > 0) {
-			std::vector<int> path = paths.at(0);
+		delete[] visitedNodes;
+		delete[] inCurrentPath;
 
-			// Add each child path to the paths vector
-			int lastNode = path.back();
-			for (int childNode : this->graph[lastNode]) {
-				bool nodeExists = std::find(path.begin(), path.end(), childNode) != path.end();
-				if (path.size() > 2 && nodeExists) {
-					// Child node already exists in the path
-					if (path.size() < 3)
-						continue; // Cycle cannot have length less than 3
+		return false;
+	}
 
-					return 1; // Cycle exists
-				}
-				else if (!nodeExists) {
-					// Create new path with this child node
-					std::vector<int> newPath(path);
-					newPath.push_back(childNode);
+private:
+	/**
+	 * @brief Checks a node via Depth-first search for a cycle.
+	 * @param node The node to check.
+	 * @param visitedNodes Nodes that have already been checked.
+	 * @param inCurrentPath Nodes that have led to this node.
+	 * @return Whether a cycle exists.
+	*/
+	bool cycleDfs(int node, bool visitedNodes[], bool inCurrentPath[]) {
+		if (visitedNodes[node] == false) {
+			// Node not already checked
+			visitedNodes[node] = true;
+			inCurrentPath[node] = true;
 
-					paths.push_back(newPath); // Add child's path to paths vector
-				}
+			// Check each adjacent node
+			for (int adjNode : this->graph[node]) {
+				if (visitedNodes[adjNode] == false && cycleDfs(adjNode, visitedNodes, inCurrentPath))
+					return true;
+				else if (inCurrentPath[adjNode])
+					return true;
 			}
-
-			paths.erase(paths.begin()); // Delete proessed path
 		}
-
-		return 0;
+		inCurrentPath[node] = false; // No longer checking
+		
+		return false;
 	}
 };
 
@@ -113,7 +113,7 @@ int main() {
 		// Print result
 		if (i > 0)
 			std::cout << std::endl;
-		std::cout << dg.containsCycle();
+		std::cout << dg.containsCycle() ? '1' : '0';
 		i++;
 	}
 
